@@ -22,6 +22,7 @@ public class GamePanel extends JPanel implements KeyListener {
     private HudManager hudManager;
     private LevelManager levelManager;
     private CollisionManager collisionManager; // <-- NOUVEAU MANAGER !
+    private GamepadManager gamepadManager;
 
     // Listes pour les éléments visuels et de gameplay
     private List<Point> etoiles = new ArrayList<>();
@@ -55,6 +56,7 @@ public class GamePanel extends JPanel implements KeyListener {
         hudManager = new HudManager();
         levelManager = new LevelManager();
         collisionManager = new CollisionManager(); // <-- INITIALISATION
+        gamepadManager = new GamepadManager();
 
         // Je génère l'espace profond
         genererEspace();
@@ -65,6 +67,7 @@ public class GamePanel extends JPanel implements KeyListener {
         // MA BOUCLE DE JEU (60 FPS)
         timer = new Timer(16, e -> {
             if (!gameOver) {
+                if (gamepadManager != null) gamepadManager.update(p1, p2);
                 // Sauvegarde des positions avant mouvement
                 int oldP1X = p1.x; int oldP1Y = p1.y;
                 int oldP2X = p2.x; int oldP2Y = p2.y;
