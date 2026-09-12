@@ -18,11 +18,12 @@ public class GamePanel extends JPanel implements KeyListener {
     private Cristal cristal;
     private Timer timer;
 
-    // Mes Managers (qui me soulagent d'énormément de code !)
+    // Mes Managers (Interface, Niveaux et Collisions)
     private HudManager hudManager;
     private LevelManager levelManager;
+    private CollisionManager collisionManager; // <-- NOUVEAU MANAGER !
 
-    // Mes listes d'objets à l'écran
+    // Listes pour les éléments visuels et de gameplay
     private List<Point> etoiles = new ArrayList<>();
     private List<DecorPlanete> listeDecors = new ArrayList<>();
     private List<Joyau> listeJoyaux = new ArrayList<>();
@@ -50,37 +51,41 @@ public class GamePanel extends JPanel implements KeyListener {
         p1.opponent = p2;
         p2.opponent = p1;
 
-        // Initialisation de mes Managers
+        // J'initialise tous mes Managers
         hudManager = new HudManager();
         levelManager = new LevelManager();
+        collisionManager = new CollisionManager(); // <-- INITIALISATION
 
         // Je génère l'espace profond
         genererEspace();
 
-        // --- JE GÉNÈRE LE NIVEAU 1 VIA MON LEVEL MANAGER ---
+        // Je génère le niveau 1 via mon LevelManager
         cristal = levelManager.genererNiveau1(listeRoches, p1, p2);
 
         // MA BOUCLE DE JEU (60 FPS)
         timer = new Timer(16, e -> {
             if (!gameOver) {
+                // Sauvegarde des positions avant mouvement
                 int oldP1X = p1.x; int oldP1Y = p1.y;
                 int oldP2X = p2.x; int oldP2Y = p2.y;
 
                 if (!p1.estEnAttenteDeRespawn) p1.update(getWidth(), getHeight());
                 if (!p2.estEnAttenteDeRespawn) p2.update(getWidth(), getHeight());
 
-                gererObstaclesSolides(oldP1X, oldP1Y, oldP2X, oldP2Y);
+                // J'utilise mon CollisionManager pour bloquer les vaisseaux contre les rochers
+                collisionManager.gererObstaclesSolides(p1, p2, listeRoches, oldP1X, oldP1Y, oldP2X, oldP2Y);
 
-                if(cristal != null) cristal.update();
+                if (cristal != null) cristal.update();
 
-                // Je mets à jour les roches (avec getHeight() pour l'effet Pac-Man)
                 for (Roche r : listeRoches) {
                     r.update(900 / 2, 520 / 2, getHeight());
                 }
 
                 for (DecorPlanete dp : listeDecors) dp.update();
 
-                checkCollisions();
+                // J'utilise mon CollisionManager pour tous les tirs, dégâts et ramassages !
+                collisionManager.verifierCollisions(p1, p2, cristal, listeRoches, listeJoyaux, listeItems);
+
                 checkEtatPartie();
             }
             repaint();
@@ -100,77 +105,7 @@ public class GamePanel extends JPanel implements KeyListener {
         listeDecors.add(new DecorPlanete(50, 80, 60, "/sprites/planete_terre.png", 0.03));
     }
 
-    // --- 4. LOGIQUE DES COLLISIONS ---
-    private void checkCollisions() {
-        // --- JOUEUR 1 ---
-        if (!p1.estEnAttenteDeRespawn) {
-            for (Projectile proj : p1.projectiles) {
-                if (!proj.actif) continue;
-
-                if (proj.getBounds().intersects(p2.getBounds())) {
-                    p2.receiveDamage(p1.calcDamageTo(p2)); p2.triggerExplosion((int) proj.x, (int) proj.y, 10); proj.actif = false;
-                } else if (cristal != null && proj.getBounds().intersects(cristal.getBounds())) {
-                    cristal.receiveDamage(10); p1.triggerExplosion((int) proj.x, (int) proj.y, 10); proj.actif = false;
-                } else {
-                    for (Roche r : listeRoches) {
-                        if (proj.getBounds().intersects(r.getBounds())) {
-                            r.receiveDamage(10); p1.triggerExplosion((int) proj.x, (int) proj.y, 5); proj.actif = false;
-                            if (!r.isAlive()) tenterLacherItem(r.x, r.y);
-                            break;
-                        }
-                    }
-                }
-            }
-            for (Joyau j : listeJoyaux) { if (j.estActif && p1.getBounds().intersects(j.getBounds())) { p1.scoreJoyaux++; j.estActif = false; } }
-            for (Item it : listeItems) { if (it.estActif && p1.getBounds().intersects(it.getBounds())) { appliquerEffetItem(p1, it); it.estActif = false; } }
-        }
-
-        // --- JOUEUR 2 ---
-        if (!p2.estEnAttenteDeRespawn) {
-            for (Projectile proj : p2.projectiles) {
-                if (!proj.actif) continue;
-
-                if (proj.getBounds().intersects(p1.getBounds())) {
-                    p1.receiveDamage(p2.calcDamageTo(p1)); p1.triggerExplosion((int) proj.x, (int) proj.y, 10); proj.actif = false;
-                } else if (cristal != null && proj.getBounds().intersects(cristal.getBounds())) {
-                    cristal.receiveDamage(10); p2.triggerExplosion((int) proj.x, (int) proj.y, 10); proj.actif = false;
-                } else {
-                    for (Roche r : listeRoches) {
-                        if (proj.getBounds().intersects(r.getBounds())) {
-                            r.receiveDamage(10); p2.triggerExplosion((int) proj.x, (int) proj.y, 5); proj.actif = false;
-                            if (!r.isAlive()) tenterLacherItem(r.x, r.y);
-                            break;
-                        }
-                    }
-                }
-            }
-            for (Joyau j : listeJoyaux) { if (j.estActif && p2.getBounds().intersects(j.getBounds())) { p2.scoreJoyaux++; j.estActif = false; } }
-            for (Item it : listeItems) { if (it.estActif && p2.getBounds().intersects(it.getBounds())) { appliquerEffetItem(p2, it); it.estActif = false; } }
-        }
-
-        listeJoyaux.removeIf(j -> !j.estActif);
-        listeRoches.removeIf(r -> !r.isAlive());
-        listeItems.removeIf(it -> !it.estActif);
-    }
-
-    private void gererObstaclesSolides(int o1X, int o1Y, int o2X, int o2Y) {
-        for (Roche r : listeRoches) {
-            if (p1.getBounds().intersects(r.getBounds())) { p1.x = o1X; p1.y = o1Y; p1.toucherObstacle(); }
-            if (p2.getBounds().intersects(r.getBounds())) { p2.x = o2X; p2.y = o2Y; p2.toucherObstacle(); }
-        }
-    }
-
-    private void tenterLacherItem(int x, int y) {
-        if (Math.random() < 0.4) listeItems.add(new Item(x, y, (int) (Math.random() * 3)));
-    }
-
-    private void appliquerEffetItem(Fighter f, Item it) {
-        if (it.type == 0) f.model.receiveDamage(-30);
-        else if (it.type == 1) f.model.restoreEnergy(50);
-        else if (it.type == 2) f.activerBouclier();
-    }
-
-    // --- 5. ÉTAT DE LA PARTIE ---
+    // --- 4. ÉTAT DE LA PARTIE ET TRANSITIONS DE NIVEAUX ---
     private void checkEtatPartie() {
         if (cristal != null && !cristal.isAlive()) {
             p1.triggerExplosion(cristal.x + 60, cristal.y + 60, 100);
@@ -194,21 +129,21 @@ public class GamePanel extends JPanel implements KeyListener {
     }
 
     private void genererButin(int startX, int startY, int quantite) {
-        for (int i = 0; i < quantite; i++) listeJoyaux.add(new Joyau(startX + (int) (Math.random() * 80 - 40), startY + (int) (Math.random() * 80 - 40)));
+        for (int i = 0; i < quantite; i++) {
+            listeJoyaux.add(new Joyau(startX + (int) (Math.random() * 80 - 40), startY + (int) (Math.random() * 80 - 40)));
+        }
     }
 
     private void passerAuNiveauSuivant() {
         niveauActuel++;
-        listeItems.clear(); // Je nettoie les items au sol, mais je laisse les joyaux
+        listeItems.clear();
 
-        // Je demande au Manager de me créer le bon niveau
         if (niveauActuel == 2) {
             cristal = levelManager.genererNiveau2(listeRoches, p1, p2);
         } else {
-            cristal = levelManager.genererNiveau1(listeRoches, p1, p2); // Si on dépasse le N2, on boucle
+            cristal = levelManager.genererNiveau1(listeRoches, p1, p2);
         }
 
-        // On réanime les morts avec 50% HP
         if (p1.estEnAttenteDeRespawn) { p1.model = new Vaisseau(P1_MAX_HP / 2, 25, 15, 8, 20); p1.estEnAttenteDeRespawn = false; }
         if (p2.estEnAttenteDeRespawn) { p2.model = new Vaisseau(P2_MAX_HP / 2, 25, 15, 6, 30); p2.estEnAttenteDeRespawn = false; }
 
@@ -228,7 +163,7 @@ public class GamePanel extends JPanel implements KeyListener {
         gameOver = false; timer.start();
     }
 
-    // --- 6. AFFICHAGE GRAPHIQUE ---
+    // --- 5. AFFICHAGE GRAPHIQUE ---
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -251,11 +186,11 @@ public class GamePanel extends JPanel implements KeyListener {
         if (cristal != null) cristal.draw(g);
         p1.draw(g); p2.draw(g);
 
-        // J'appelle le HUD Manager
+        // Dessin du HUD
         if (hudManager != null) hudManager.draw(g2d, p1, p2, niveauActuel, getWidth());
     }
 
-    // --- 7. CONTRÔLES ---
+    // --- 6. CONTRÔLES ---
     @Override
     public void keyPressed(KeyEvent e) {
         int k = e.getKeyCode();
