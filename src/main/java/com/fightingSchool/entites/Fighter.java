@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
+import com.fightingSchool.core.SoundManager;
 
 public class Fighter {
     // --- 1. MES PROPRIÉTÉS DE BASE ---
@@ -141,19 +142,22 @@ public class Fighter {
         if (shootCooldown > 0) shootCooldown--;
     }
 
-    // --- MA LOGIQUE DE TIR (RÉTABLIE) ---
+    // --- MES TIRS AVEC BRUITAGES ---
 
-    // Mon tir normal (Missile 2)
+    // 1. Tir normal (Missile 2)
     public void fire(int ignored) {
         if (shootCooldown > 0 || estEnAttenteDeRespawn) return;
         double rad = Math.toRadians(angle - 90);
-        // Je crée un projectile qui part droit devant mon nez
         Projectile proj = new Projectile(x + width/2.0, y + height/2.0, Math.cos(rad)*10, Math.sin(rad)*10, angle, "/sprites/missile2.png", 5, null);
         projectiles.add(proj);
+
+        // Je joue le son de tir normal !
+        SoundManager.getInstance().jouerSon("/sons/tir_normal.wav");
+
         shootCooldown = SHOOT_COOLDOWN_MAX;
     }
 
-    // Mon tir puissant (Missile)
+    // 2. Tir puissant (Missile)
     public void specialFire(int ignored) {
         if (estEnAttenteDeRespawn) return;
         if (model.useEnergy(25) && shootCooldown <= 0) {
@@ -161,11 +165,15 @@ public class Fighter {
             Projectile proj = new Projectile(x + width/2.0, y + height/2.0, Math.cos(rad)*12, Math.sin(rad)*12, angle, "/sprites/missile.png", 15, null);
             proj.width = 30; proj.height = 40;
             projectiles.add(proj);
+
+            // Je joue le son du gros missile !
+            SoundManager.getInstance().jouerSon("/sons/tir_puissant.wav");
+
             shootCooldown = SHOOT_COOLDOWN_MAX * 2;
         }
     }
 
-    // Mon tir à tête chercheuse (Missile Sp)
+    // 3. Tir tête chercheuse (Missile Sp)
     public void fireHoming() {
         if (estEnAttenteDeRespawn) return;
         if (model.useEnergy(45) && shootCooldown <= 0) {
@@ -173,6 +181,10 @@ public class Fighter {
             Projectile proj = new Projectile(x + width/2.0, y + height/2.0, Math.cos(rad)*6, Math.sin(rad)*6, angle, "/sprites/missileSp.png", 25, opponent);
             proj.width = 35; proj.height = 45;
             projectiles.add(proj);
+
+            // Je joue le son du missile à tête chercheuse !
+            SoundManager.getInstance().jouerSon("/sons/tir_homing.wav");
+
             shootCooldown = SHOOT_COOLDOWN_MAX * 3;
         }
     }
