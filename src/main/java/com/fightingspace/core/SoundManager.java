@@ -1,4 +1,4 @@
-package com.fightingSchool.core;
+package com.fightingspace.core;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;

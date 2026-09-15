@@ -1,6 +1,6 @@
-package com.fightingSchool.ui;
+package com.fightingspace.ui;
 
-import com.fightingSchool.entites.Fighter;
+import com.fightingspace.entites.Fighter;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import javax.swing.ImageIcon;

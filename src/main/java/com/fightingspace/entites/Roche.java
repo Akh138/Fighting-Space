@@ -1,4 +1,4 @@
-package com.fightingSchool.entites;
+package com.fightingspace.entites;
 
 import java.awt.*;
 import javax.swing.ImageIcon;

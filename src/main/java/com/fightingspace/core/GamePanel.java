@@ -1,8 +1,8 @@
-package com.fightingSchool.core;
+package com.fightingspace.core;
 
-import com.fightingSchool.entites.*;
-import com.fightingSchool.ui.HudManager;
-import com.fightingSchool.niveaux.LevelManager;
+import com.fightingspace.entites.*;
+import com.fightingspace.ui.HudManager;
+import com.fightingspace.niveaux.LevelManager;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.fightingSchool.entites;
+package com.fightingspace.entites;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.awt.Image;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
-import com.fightingSchool.core.SoundManager;
+import com.fightingspace.core.SoundManager;
 
 public class Fighter {
     // --- 1. MES PROPRIÉTÉS DE BASE ---

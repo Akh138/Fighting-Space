@@ -1,11 +1,11 @@
-package com.fightingSchool.core;
+package com.fightingspace.core;
 
 import javax.swing.*;
 
 public class GameFrame extends JFrame {
 
     public GameFrame(){
-        setTitle(" Fighting School - Space Battle Démo ");
+        setTitle(" Fighting Space - Space Battle Démo ");
 
 
         // Quand l'utilisateur ferme la fenêtre : quitter l'application

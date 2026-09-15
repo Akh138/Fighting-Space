@@ -1,6 +1,6 @@
-package com.fightingSchool.core;
+package com.fightingspace.core;
 
-import com.fightingSchool.entites.*;
+import com.fightingspace.entites.*;
 import java.util.List;
 
 /**

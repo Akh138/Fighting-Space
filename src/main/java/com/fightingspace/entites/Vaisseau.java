@@ -1,4 +1,4 @@
-package com.fightingSchool.entites;
+package com.fightingspace.entites;
 
 /**
  * Ma classe Vaisseau : c'est ici que je stocke toutes les statistiques

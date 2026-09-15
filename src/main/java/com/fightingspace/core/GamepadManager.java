@@ -1,8 +1,8 @@
-package com.fightingSchool.core;
+package com.fightingspace.core;
 
 import com.studiohartman.jamepad.ControllerManager;
 import com.studiohartman.jamepad.ControllerState;
-import com.fightingSchool.entites.Fighter;
+import com.fightingspace.entites.Fighter;
 
 /**
  * Mon Gestionnaire de Manettes avec détection automatique sur les 4 ports Windows.

@@ -1,8 +1,8 @@
-package com.fightingSchool;
+package com.fightingspace;
 
 
 
-import com.fightingSchool.core.GameFrame;
+import com.fightingspace.core.GameFrame;
 
 public class Main {
     public static void main(String[] args) {

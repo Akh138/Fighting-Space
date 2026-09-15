@@ -1,9 +1,9 @@
-package com.fightingSchool.niveaux;
+package com.fightingspace.niveaux;
 
-import com.fightingSchool.entites.Cristal;
-import com.fightingSchool.entites.Fighter;
-import com.fightingSchool.entites.Roche;
-import com.fightingSchool.entites.Ennemi; // J'importe les monstres pour le niveau 3
+import com.fightingspace.entites.Cristal;
+import com.fightingspace.entites.Fighter;
+import com.fightingspace.entites.Roche;
+import com.fightingspace.entites.Ennemi; // J'importe les monstres pour le niveau 3
 import java.util.List;
 
 /**
